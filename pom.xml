@@ -38,7 +38,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
-		<finalName>earthquake-service</finalName>
+		<finalName>earthquakes-service</finalName>
 	</build>
 
 </project>
