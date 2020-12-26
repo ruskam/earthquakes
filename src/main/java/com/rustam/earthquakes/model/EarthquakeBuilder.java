@@ -5,6 +5,7 @@ public class EarthquakeBuilder {
     private Double magnitude;
     private String title;
     private Integer distance;
+    private GeoLocation coordinates;
 
     public EarthquakeBuilder setId(String id) {
         this.id = id;
@@ -26,7 +27,12 @@ public class EarthquakeBuilder {
         return this;
     }
 
+    public EarthquakeBuilder setCoordinates(GeoLocation coordinates) {
+        this.coordinates = coordinates;
+        return this;
+    }
+
     public Earthquake buildEarthquake(){
-        return new Earthquake(id, magnitude, title, distance);
+        return new Earthquake(id, magnitude, title, distance, coordinates);
     }
 }

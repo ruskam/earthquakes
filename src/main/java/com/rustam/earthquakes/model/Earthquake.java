@@ -1,19 +1,23 @@
 package com.rustam.earthquakes.model;
 
+import java.util.Objects;
+
 public class Earthquake {
     private String id;
     private Double magnitude;
     private String title;
     private Integer distance;
+    private GeoLocation coordinates;
 
-    public Earthquake() {
+    public Earthquake(Earthquake us7000cmj2) {
     }
 
-    public Earthquake(String id, Double magnitude, String title, Integer distance) {
+    public Earthquake(String id, Double magnitude, String title, Integer distance, GeoLocation coordinates) {
         this.id = id;
         this.magnitude = magnitude;
         this.title = title;
         this.distance = distance;
+        this.coordinates = coordinates;
     }
 
     public String getId() {
@@ -48,6 +52,27 @@ public class Earthquake {
         this.distance = distance;
     }
 
+    public GeoLocation getCoordinates() {
+        return coordinates;
+    }
+
+    public void setCoordinates(GeoLocation coordinates) {
+        this.coordinates = coordinates;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Earthquake)) return false;
+        Earthquake that = (Earthquake) o;
+        return Objects.equals(getId(), that.getId()) && Objects.equals(getMagnitude(), that.getMagnitude()) && Objects.equals(getTitle(), that.getTitle()) && Objects.equals(getDistance(), that.getDistance()) && Objects.equals(getCoordinates(), that.getCoordinates());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId(), getMagnitude(), getTitle(), getDistance(), getCoordinates());
+    }
+
     @Override
     public String toString() {
         return "Earthquake{" +
@@ -55,6 +80,7 @@ public class Earthquake {
                 ", magnitude=" + magnitude +
                 ", title='" + title + '\'' +
                 ", distance=" + distance +
+                ", coordinates=" + coordinates +
                 '}';
     }
 }
