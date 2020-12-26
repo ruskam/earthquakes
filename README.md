@@ -1,4 +1,4 @@
-# Earthquakes-service *
+# Earthquakes-service
 
 ## How to run
 
@@ -24,4 +24,4 @@ http://localhost:8081/api/earthquake/lat/{lat}/lon/{lon}
 Passing latitude and lontide as a must.
 
 
-####* The instructions are test on MacOS
+#### NOTE: The instructions are test on MacOS
