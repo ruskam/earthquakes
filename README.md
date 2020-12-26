@@ -1,4 +1,4 @@
-# Earthquakes-service
+# Earthquakes
 
 ## How to run
 
