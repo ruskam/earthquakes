@@ -15,13 +15,15 @@ Download the earthquakes/target/earthquakes-service.jar and run in the terminal
 java -jar earthquakes-service.jar 
 ```
 
-### Where to see the outcome
+### Where to see the output
 
-The application will be availale on the localhos at port 8081:
+After the application is started, it is mandatory to open a browser and pass the latitude and longitude as part of the URL endpoint
+
 ```bash
 http://localhost:8081/api/earthquake/lat/{lat}/lon/{lon}
 ```
-Passing latitude and lontide as a must.
+
+The output is available as a JSON response and in the console (if run from the Intellij IDEA) and in the terminal (if run through the terminal command)
 
 
-#### NOTE: The instructions are test on MacOS
+#### NOTE: The instructions are testes on MacOS
