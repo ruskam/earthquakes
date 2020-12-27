@@ -1,19 +1,16 @@
 package com.rustam.earthquakes.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class UsgsGeometry {
 
     private Double[] coordinates;
 
     public UsgsGeometry() {
         coordinates = new Double[2];
-    }
-
-    public Double[] getCoordinates() {
-        return coordinates;
-    }
-
-    public void setCoordinates(Double[] coordinates) {
-        this.coordinates = coordinates;
     }
 
     public double getLat() {

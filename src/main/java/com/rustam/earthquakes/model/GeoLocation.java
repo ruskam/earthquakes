@@ -1,32 +1,20 @@
 package com.rustam.earthquakes.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Objects;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class GeoLocation {
     private Double lat;
     private Double lon;
 
-    public GeoLocation() {
-    }
-
     public GeoLocation(Double lat, Double lon) {
         this.lat = lat;
-        this.lon = lon;
-    }
-
-    public Double getLat() {
-        return lat;
-    }
-
-    public void setLat(Double lat) {
-        this.lat = lat;
-    }
-
-    public Double getLon() {
-        return lon;
-    }
-
-    public void setLon(Double lon) {
         this.lon = lon;
     }
 

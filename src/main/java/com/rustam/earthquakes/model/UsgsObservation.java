@@ -1,43 +1,23 @@
 package com.rustam.earthquakes.model;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.Objects;
 
+@Getter
+@Setter
+@NoArgsConstructor
 public class UsgsObservation {
 
     private UsgsProperty properties;
     private UsgsGeometry geometry;
     private String id;
 
-    public UsgsObservation() {
-    }
-
     public UsgsObservation(UsgsProperty properties, UsgsGeometry geometry, String id) {
         this.properties = properties;
         this.geometry = geometry;
-        this.id = id;
-    }
-
-    public UsgsProperty getProperties() {
-        return properties;
-    }
-
-    public void setProperties(UsgsProperty properties) {
-        this.properties = properties;
-    }
-
-    public UsgsGeometry getGeometry() {
-        return geometry;
-    }
-
-    public void setGeometry(UsgsGeometry geometry) {
-        this.geometry = geometry;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
         this.id = id;
     }
 
