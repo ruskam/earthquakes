@@ -29,13 +29,13 @@ public class UsgsService implements IUsgsService{
 
     @Override
     public List<Earthquake> getEarthquake(double lat, double lon) {
+
         IUsgsResponse response = repository.getUsgsResponse(lat, lon);
         List<Earthquake> earthquakes = sortFilter(populateEarthquakes(response, lat, lon));
         printer.print(earthquakes);
 
         return earthquakes;
     }
-
 
     private List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
         List<Earthquake> earthquakes = new ArrayList<>(10);
