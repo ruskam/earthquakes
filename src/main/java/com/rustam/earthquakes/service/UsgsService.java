@@ -1,9 +1,6 @@
 package com.rustam.earthquakes.service;
 
-import com.rustam.earthquakes.model.Earthquake;
-import com.rustam.earthquakes.model.EarthquakeBuilder;
-import com.rustam.earthquakes.model.GeoLocation;
-import com.rustam.earthquakes.model.IUsgsResponse;
+import com.rustam.earthquakes.model.*;
 import com.rustam.earthquakes.repository.IUsgsRepository;
 import com.rustam.earthquakes.util.IDistance;
 import com.rustam.earthquakes.util.IPrinterToConsole;
@@ -28,13 +25,16 @@ public class UsgsService implements IUsgsService{
     }
 
     @Override
-    public List<Earthquake> getEarthquake(double lat, double lon) {
+    public EarthquakeWrapper getEarthquake(double lat, double lon) {
 
         IUsgsResponse response = repository.getUsgsResponse(lat, lon);
         List<Earthquake> earthquakes = sortFilter(populateEarthquakes(response, lat, lon));
+        EarthquakeWrapper earthquakeWrapper = new EarthquakeWrapper();
+        earthquakeWrapper.setEarthquakes(earthquakes);
+
         printer.print(earthquakes);
 
-        return earthquakes;
+        return earthquakeWrapper;
     }
 
     private List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {

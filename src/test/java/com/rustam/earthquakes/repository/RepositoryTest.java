@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestTemplate;
 
 @SpringBootTest
-public class RepositoryTest {
+class RepositoryTest {
 
     private static final String PORT = "8081";
 
@@ -15,7 +15,7 @@ public class RepositoryTest {
     private RestTemplate restTemplate;
 
     @Test
-    public void testResposeNotNull(){
+    void testResposeNotNull(){
         String object = this.restTemplate.getForObject("http://localhost:"
                         + PORT
                         + "/api/earthquake/lat/40.71427/lon/-74.00597",
