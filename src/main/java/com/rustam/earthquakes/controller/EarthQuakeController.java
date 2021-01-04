@@ -1,6 +1,7 @@
 package com.rustam.earthquakes.controller;
 
 import com.rustam.earthquakes.exception.UsgsResourceNotFoundException;
+import com.rustam.earthquakes.model.Earthquake;
 import com.rustam.earthquakes.model.EarthquakeWrapper;
 import com.rustam.earthquakes.service.IUsgsService;
 import org.springframework.http.HttpStatus;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
 
 @RestController
 @RequestMapping(value = ControllerConstants.EARTH_QUAKE_ENDPOINT)
@@ -30,6 +32,18 @@ public class EarthQuakeController {
             throw new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "something went wrong for location" +
                 lat + ", " + lon, e);
+        }
+    }
+
+    @GetMapping(value = "/async/lat/{lat}/lon/{lon}")
+    public ResponseEntity<Flux<Earthquake>> getEQAsync(@PathVariable("lat") double lat, @PathVariable("lon") double lon) {
+        try {
+            Flux<Earthquake> earthquakeAsync = service.getEarthquakeAsync(lat, lon);
+            return ResponseEntity.ok().body(earthquakeAsync);
+        } catch (UsgsResourceNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "something went wrong for location" +
+                    lat + ", " + lon, e);
         }
     }
 

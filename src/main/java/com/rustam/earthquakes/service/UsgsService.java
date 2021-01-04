@@ -5,6 +5,8 @@ import com.rustam.earthquakes.repository.IUsgsRepository;
 import com.rustam.earthquakes.util.IDistance;
 import com.rustam.earthquakes.util.IPrinterToConsole;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,30 +27,51 @@ public class UsgsService implements IUsgsService{
     }
 
     @Override
-    public EarthquakeWrapper getEarthquake(double lat, double lon) {
+    public Flux<Earthquake> getEarthquakeAsync(double lat, double lon) {
 
+        Mono<UsgsResponse> mono = repository.getUsgsResponseAsync(lat, lon);
+
+        return mono.map(response -> response.getFeatures().stream()
+                .map(feat -> {
+                    double lati = feat.getGeometry().getLat();
+                    double longi = feat.getGeometry().getLon();
+                    return new EarthquakeBuilder()
+                            .setId(feat.getId())
+                            .setMagnitude(feat.getProperties().getMag())
+                            .setTitle(feat.getProperties().getTitle())
+                            .setDistance(distance.calculate(lat, lon, lati, longi))
+                            .setCoordinates(new GeoLocation(lati, longi))
+                            .buildEarthquake();
+                }).sorted(Comparator.comparingInt(Earthquake::getDistance))
+                .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
+                .collect(Collectors.toList()))
+                .flatMapMany(Flux::fromIterable);
+    }
+
+    @Override
+    public EarthquakeWrapper getEarthquake(double lat, double lon) {
         IUsgsResponse response = repository.getUsgsResponse(lat, lon);
         List<Earthquake> earthquakes = sortFilter(populateEarthquakes(response, lat, lon));
+
         EarthquakeWrapper earthquakeWrapper = new EarthquakeWrapper();
         earthquakeWrapper.setEarthquakes(earthquakes);
-
         printer.print(earthquakes);
 
         return earthquakeWrapper;
+
     }
 
-    private List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
+    public List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
         List<Earthquake> earthquakes = new ArrayList<>(10);
-
         Set<GeoLocation> coords = new HashSet<>();
 
         Earthquake earthquake;
-        for (int i = 0; i < response.getFeatures().size(); i++) {
-            int distanceCalculated = distance.calculate(lat, lon,
-                    response.getFeatures().get(i).getGeometry().getLat(),
-                    response.getFeatures().get(i).getGeometry().getLon());
 
-            GeoLocation geoLocation = new GeoLocation(response.getFeatures().get(i).getGeometry().getLat(), response.getFeatures().get(i).getGeometry().getLon());
+        for (int i = 0; i < response.getFeatures().size(); i++) {
+            double lati = response.getFeatures().get(i).getGeometry().getLat();
+            double longi = response.getFeatures().get(i).getGeometry().getLon();
+            int distanceCalculated = distance.calculate(lat, lon, lati, longi);
+            GeoLocation geoLocation = new GeoLocation(lati, longi);
             if (!coords.contains(geoLocation)) {
                 earthquake = new EarthquakeBuilder()
                         .setId(response.getFeatures().get(i).getId())
