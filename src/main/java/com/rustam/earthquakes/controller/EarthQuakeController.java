@@ -6,10 +6,7 @@ import com.rustam.earthquakes.model.EarthquakeWrapper;
 import com.rustam.earthquakes.service.IUsgsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 
@@ -28,11 +25,16 @@ public class EarthQuakeController {
         try {
             EarthquakeWrapper earthquakes = service.getEarthquake(lat, lon);
             return ResponseEntity.ok().body(earthquakes);
-        } catch (UsgsResourceNotFoundException e) {
+        } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "something went wrong for location" +
-                lat + ", " + lon, e);
+                    HttpStatus.NOT_ACCEPTABLE, "Coordinates " +
+                    lat + ", " + lon + " are out of bounds", e);
         }
+        catch (UsgsResourceNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "No URL requested" , e);
+        }
+
     }
 
     @GetMapping(value = "/async/lat/{lat}/lon/{lon}")
@@ -40,10 +42,14 @@ public class EarthQuakeController {
         try {
             Flux<Earthquake> earthquakeAsync = service.getEarthquakeAsync(lat, lon);
             return ResponseEntity.ok().body(earthquakeAsync);
-        } catch (UsgsResourceNotFoundException e) {
+        } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "something went wrong for location" +
-                    lat + ", " + lon, e);
+                    HttpStatus.NOT_ACCEPTABLE, "Coordinates " +
+                    lat + ", " + lon + " are out of bounds", e);
+        }
+        catch (UsgsResourceNotFoundException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "No URL requested" , e);
         }
     }
 

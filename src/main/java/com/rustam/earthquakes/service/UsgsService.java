@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
-public class UsgsService implements IUsgsService{
+public class UsgsService implements IUsgsService {
 
     private static final int NUMBER_CLOSEST_EARTHQUAKE_SITES = 10;
 
@@ -32,15 +32,25 @@ public class UsgsService implements IUsgsService{
 
     @Override
     public EarthquakeWrapper getEarthquake(double lat, double lon) {
-        IUsgsResponse response = repository.getUsgsResponse(lat, lon);
-        List<Earthquake> earthquakes = populateEarthquakes(response, lat, lon);
-        EarthquakeWrapper earthquakeWrapper = new EarthquakeWrapper();
-        earthquakeWrapper.setEarthquakes(earthquakes);
+        if (isLocationValid(lat, lon)) {
+            IUsgsResponse response = repository.getUsgsResponse(lat, lon);
+            List<Earthquake> earthquakes = populateEarthquakes(response, lat, lon);
+            EarthquakeWrapper earthquakeWrapper = new EarthquakeWrapper();
+            earthquakeWrapper.setEarthquakes(earthquakes);
 
-        printer.print(earthquakes);
+            printer.print(earthquakes);
 
-        return earthquakeWrapper;
+            return earthquakeWrapper;
+        } else {
+            throw new IllegalArgumentException("Latitude should be between -90 and 90 degrees");
+        }
+    }
 
+    private boolean isLocationValid(double lat, double lon) {
+        if ((lat >= -90 && lat <= 90) && (lon >= -180 && lon <= 180)) {
+            return true;
+        }
+        return false;
     }
 
     public List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
