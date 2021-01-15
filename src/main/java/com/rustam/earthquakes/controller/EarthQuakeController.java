@@ -29,8 +29,7 @@ public class EarthQuakeController {
             throw new ResponseStatusException(
                     HttpStatus.NOT_ACCEPTABLE, "Coordinates " +
                     lat + ", " + lon + " are out of bounds", e);
-        }
-        catch (UsgsResourceNotFoundException e) {
+        } catch (UsgsResourceNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "No URL requested" , e);
         }
@@ -46,8 +45,7 @@ public class EarthQuakeController {
             throw new ResponseStatusException(
                     HttpStatus.NOT_ACCEPTABLE, "Coordinates " +
                     lat + ", " + lon + " are out of bounds", e);
-        }
-        catch (UsgsResourceNotFoundException e) {
+        } catch (UsgsResourceNotFoundException e) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "No URL requested" , e);
         }
