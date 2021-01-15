@@ -6,9 +6,13 @@ import com.rustam.earthquakes.util.IDistance;
 import com.rustam.earthquakes.util.IPrinterToConsole;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,34 +31,12 @@ public class UsgsService implements IUsgsService{
     }
 
     @Override
-    public Flux<Earthquake> getEarthquakeAsync(double lat, double lon) {
-
-        Mono<UsgsResponse> mono = repository.getUsgsResponseAsync(lat, lon);
-
-        return mono.map(response -> response.getFeatures().stream()
-                .map(feat -> {
-                    double lati = feat.getGeometry().getLat();
-                    double longi = feat.getGeometry().getLon();
-                    return new EarthquakeBuilder()
-                            .setId(feat.getId())
-                            .setMagnitude(feat.getProperties().getMag())
-                            .setTitle(feat.getProperties().getTitle())
-                            .setDistance(distance.calculate(lat, lon, lati, longi))
-                            .setCoordinates(new GeoLocation(lati, longi))
-                            .buildEarthquake();
-                }).sorted(Comparator.comparingInt(Earthquake::getDistance))
-                .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
-                .collect(Collectors.toList()))
-                .flatMapMany(Flux::fromIterable);
-    }
-
-    @Override
     public EarthquakeWrapper getEarthquake(double lat, double lon) {
         IUsgsResponse response = repository.getUsgsResponse(lat, lon);
-        List<Earthquake> earthquakes = sortFilter(populateEarthquakes(response, lat, lon));
-
+        List<Earthquake> earthquakes = populateEarthquakes(response, lat, lon);
         EarthquakeWrapper earthquakeWrapper = new EarthquakeWrapper();
         earthquakeWrapper.setEarthquakes(earthquakes);
+
         printer.print(earthquakes);
 
         return earthquakeWrapper;
@@ -62,38 +44,52 @@ public class UsgsService implements IUsgsService{
     }
 
     public List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
-        List<Earthquake> earthquakes = new ArrayList<>(10);
-        Set<GeoLocation> coords = new HashSet<>();
 
-        Earthquake earthquake;
-
-        for (int i = 0; i < response.getFeatures().size(); i++) {
-            double lati = response.getFeatures().get(i).getGeometry().getLat();
-            double longi = response.getFeatures().get(i).getGeometry().getLon();
-            int distanceCalculated = distance.calculate(lat, lon, lati, longi);
-            GeoLocation geoLocation = new GeoLocation(lati, longi);
-            if (!coords.contains(geoLocation)) {
-                earthquake = new EarthquakeBuilder()
-                        .setId(response.getFeatures().get(i).getId())
-                        .setMagnitude(response.getFeatures().get(i).getProperties().getMag())
-                        .setTitle(response.getFeatures().get(i).getProperties().getTitle())
-                        .setDistance(distanceCalculated)
-                        .setCoordinates(geoLocation)
-                        .buildEarthquake();
-                earthquakes.add(earthquake);
-                coords.add(geoLocation);
-            }
-        }
-        return earthquakes;
-    }
-
-    private List<Earthquake> sortFilter(List<Earthquake> earthquakes) {
-
-        return earthquakes.stream()
+        return response.getFeatures().stream()
+                .map(feature -> {
+                    double lati = feature.getGeometry().getLat();
+                    double longi = feature.getGeometry().getLon();
+                    return new EarthquakeBuilder()
+                            .setId(feature.getId())
+                            .setMagnitude(feature.getProperties().getMag())
+                            .setTitle(feature.getProperties().getTitle())
+                            .setDistance(distance.calculate(lat, lon, lati, longi))
+                            .setCoordinates(new GeoLocation(lati, longi))
+                            .buildEarthquake();
+                })
+                .filter(distinctByKey(Earthquake::getCoordinates))
                 .sorted(Comparator.comparingInt(Earthquake::getDistance))
                 .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Flux<Earthquake> getEarthquakeAsync(double lat, double lon) {
 
+        return repository.getUsgsResponseAsync(lat, lon)
+                .map(response -> response.getFeatures()
+                        .stream()
+                    .map(feat -> {
+                        double lati = feat.getGeometry().getLat();
+                        double longi = feat.getGeometry().getLon();
+                        return new EarthquakeBuilder()
+                                .setId(feat.getId())
+                                .setMagnitude(feat.getProperties().getMag())
+                                .setTitle(feat.getProperties().getTitle())
+                                .setDistance(distance.calculate(lat, lon, lati, longi))
+                                .setCoordinates(new GeoLocation(lati, longi))
+                                .buildEarthquake();
+                    })
+                    .sorted(Comparator.comparingInt(Earthquake::getDistance))
+                    .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
+                    .collect(Collectors.toList()))
+                .flatMapMany(Flux::fromIterable);
+
+    }
+
+    private <T> Predicate<T> distinctByKey(Function<? super T, GeoLocation> keyExtractor)
+    {
+        Map<GeoLocation, Boolean> map = new ConcurrentHashMap<>();
+        return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
+    }
 }
