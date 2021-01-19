@@ -1,9 +1,12 @@
 package com.rustam.earthquakes.model;
 
+import java.time.LocalDate;
+
 public class EarthquakeBuilder {
     private String id;
     private Double magnitude;
     private String title;
+    private LocalDate date;
     private Integer distance;
     private GeoLocation coordinates;
 
@@ -22,6 +25,11 @@ public class EarthquakeBuilder {
         return this;
     }
 
+    public EarthquakeBuilder setDate(LocalDate date) {
+        this.date = date;
+        return this;
+    }
+
     public EarthquakeBuilder setDistance(Integer distance) {
         this.distance = distance;
         return this;
@@ -33,6 +41,6 @@ public class EarthquakeBuilder {
     }
 
     public Earthquake buildEarthquake(){
-        return new Earthquake(id, magnitude, title, distance, coordinates);
+        return new Earthquake(id, magnitude, title, date, distance, coordinates);
     }
 }
