@@ -49,7 +49,6 @@ public class UsgsService implements IUsgsService {
     }
 
     public List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
-        System.out.println("Sync: " + response.getFeatures().size());
         return response.getFeatures().stream()
                 .map(feature -> {
                     double lati = feature.getGeometry().getLat();
@@ -73,9 +72,6 @@ public class UsgsService implements IUsgsService {
 
     @Override
     public Flux<Earthquake> getEarthquakeAsync(double lat, double lon) {
-
-        UsgsResponse block = repository.getUsgsResponseAsync(lat, lon).block();
-        System.out.println("Async: " + block.getFeatures().size());
 
         return repository.getUsgsResponseAsync(lat, lon)
                 .map(response -> response.getFeatures()
