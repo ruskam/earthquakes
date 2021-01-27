@@ -6,7 +6,10 @@ There are two input parameters: latitude and longitude.
 
 # Solution
 
-## How to run
+### Technology stack used
+Spring Boot, Java 8+, WebFlux
+
+### How to run
 
 There are two ways to run the app
 
