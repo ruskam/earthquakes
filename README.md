@@ -1,4 +1,10 @@
-# Earthquakes
+# Problem
+Read earthquake events from https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson
+and find 10 earthquakes that happened in the closest proximity to the input location.
+
+There are two input parameters: latitude and longitude.
+
+#Solution
 
 ## How to run
 
