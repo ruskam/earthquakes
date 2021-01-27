@@ -4,7 +4,7 @@ and find 10 earthquakes that happened in the closest proximity to the input loca
 
 There are two input parameters: latitude and longitude.
 
-#Solution
+# Solution
 
 ## How to run
 
