@@ -16,7 +16,7 @@ public class PrinterToConsole implements IPrinterToConsole{
         System.out.println("Observations accessed on " + LocalDate.now() + ", at "
                 + LocalTime.now().getHour() + ":" + LocalTime.now().getMinute() + ":" + LocalTime.now().getSecond());
         for (Earthquake e : earthquakes) {
-            System.out.println(e.getTitle() + " || " + e.getDistance());
+            System.out.println(e.getTitle() + " || " + e.getDistance() + " || " + e.getDate());
         }
     }
 }

@@ -2,7 +2,13 @@
 Read earthquake events from https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_month.geojson
 and find 10 earthquakes that happened in the closest proximity to the input location.
 
-There are two input parameters: latitude and longitude.
+In detail, create a (REST) microservice that:
+* Accepts two float numbers as request parameters that represent the lat/lon of any location
+* Read a list of earthquakes that happened during last 30 days
+* Calculate distance between given location and each of the earthquakes
+* Provide a JSON response and also print the 10 earthquakes with the shortest distance to the given location
+* The output list should contain earthquake magnitude, title, date, distance in kilometers and geographic coordinates
+* If there is more than one earthquake event recorded in any location, there should be only one considered 
 
 # Solution
 

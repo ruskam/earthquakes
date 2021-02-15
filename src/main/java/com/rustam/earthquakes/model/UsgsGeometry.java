@@ -1,10 +1,12 @@
 package com.rustam.earthquakes.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
+@AllArgsConstructor
 public class UsgsGeometry {
 
     private Double[] coordinates;

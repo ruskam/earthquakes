@@ -4,6 +4,7 @@ import com.rustam.earthquakes.model.*;
 import com.rustam.earthquakes.repository.IUsgsRepository;
 import com.rustam.earthquakes.util.IDistance;
 import com.rustam.earthquakes.util.IPrinterToConsole;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -22,10 +23,15 @@ public class UsgsService implements IUsgsService {
 
     private static final int NUMBER_CLOSEST_EARTHQUAKE_SITES = 10;
 
-    private final IUsgsRepository repository;
-    private final IDistance distance;
-    private final IPrinterToConsole printer;
+    private IUsgsRepository repository;
+    private IDistance distance;
+    private IPrinterToConsole printer;
 
+    public UsgsService(IUsgsRepository repository) {
+        this.repository = repository;
+    }
+
+    @Autowired
     public UsgsService(IUsgsRepository repository, IDistance distance, IPrinterToConsole printer) {
         this.repository = repository;
         this.distance = distance;
@@ -49,6 +55,7 @@ public class UsgsService implements IUsgsService {
     }
 
     public List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
+
         return response.getFeatures().stream()
                 .map(feature -> {
                     double lati = feature.getGeometry().getLat();
@@ -75,7 +82,7 @@ public class UsgsService implements IUsgsService {
 
         return repository.getUsgsResponseAsync(lat, lon)
                 .map(response -> response.getFeatures()
-                        .stream()
+                    .stream()
                     .map(feat -> {
                         double lati = feat.getGeometry().getLat();
                         double longi = feat.getGeometry().getLon();
@@ -90,6 +97,7 @@ public class UsgsService implements IUsgsService {
                                 .setCoordinates(new GeoLocation(lati, longi))
                                 .buildEarthquake();
                     })
+                    .filter(distinctByKey(Earthquake::getCoordinates))
                     .sorted(Comparator.comparingInt(Earthquake::getDistance))
                     .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
                     .collect(Collectors.toList()))
@@ -97,7 +105,7 @@ public class UsgsService implements IUsgsService {
 
     }
 
-    private <T> Predicate<T> distinctByKey(Function<? super T, GeoLocation> keyExtractor) {
+    public <T> Predicate<T> distinctByKey(Function<? super T, GeoLocation> keyExtractor) {
         Map<GeoLocation, Boolean> map = new ConcurrentHashMap<>();
         return t -> map.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
