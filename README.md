@@ -12,7 +12,7 @@ In detail, create a (REST) microservice that:
 
 # Solution
 
-## Technology stack used
+## Technology stack
 Spring Boot, Java 8+, WebFlux
 
 ## How to run
