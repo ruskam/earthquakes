@@ -22,7 +22,6 @@ import java.util.stream.Collectors;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
-//@MockitoSettings(strictness = Strictness.LENIENT)
 class UsgsServiceUnitTest {
 
     private UsgsService service;
@@ -34,26 +33,28 @@ class UsgsServiceUnitTest {
     private IUsgsRepository mockedRepository;
 
     @BeforeEach
-    void init() {
+    void beforeEach() {
         distance = new Distance();
         printer = new PrinterToConsole();
         loadFeatures();
-        Assertions.assertNotNull(mockedRepository);
-        lenient().when(mockedRepository.getUsgsResponse(12.12, 44.44)).thenReturn(response);
-        service = new UsgsService(mockedRepository, distance, printer);
+
     }
-
-
 
     @Test
     void getEarthquake() {
-//        EarthquakeWrapper earthquakeWrapper = service.getEarthquake(12.12, 15.15);
-//        Assertions.assertEquals(4, earthquakeWrapper.getEarthquakes().size());
+        Assertions.assertNotNull(mockedRepository);
+        lenient().when(mockedRepository.getUsgsResponse(12.12, 44.44)).thenReturn(response);
+        service = new UsgsService(mockedRepository, distance, printer);
 
+        EarthquakeWrapper earthquakeWrapper = service.getEarthquake(12.12, 15.15);
+        Assertions.assertEquals(4, earthquakeWrapper.getEarthquakes().size());
     }
 
     @Test
     void populateEarthquakes() {
+        Assertions.assertNotNull(mockedRepository);
+        lenient().when(mockedRepository.getUsgsResponse(12.12, 44.44)).thenReturn(response);
+        service = new UsgsService(mockedRepository, distance, printer);
         List<Earthquake> earthquakes = service.populateEarthquakes(response, 12.12, 44.44);
 
         Assertions.assertEquals(4, earthquakes.size());

@@ -37,8 +37,6 @@ public class UsgsService implements IUsgsService {
         if (isLocationValid(lat, lon)) {
             IUsgsResponse response = repository.getUsgsResponse(lat, lon);
             List<Earthquake> earthquakes = populateEarthquakes(response, lat, lon);
-//            printer.print(earthquakes);
-            System.out.println("Data must be mocked");
             return new EarthquakeWrapper(earthquakes);
         } else {
             throw new IllegalArgumentException("Wrong coordinates");
@@ -50,31 +48,33 @@ public class UsgsService implements IUsgsService {
     }
 
     public List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
-
-        return response.getFeatures().stream()
-                .map(feature -> {
-                    double lati = feature.getGeometry().getLat();
-                    double longi = feature.getGeometry().getLon();
-                    return new EarthquakeBuilder()
-                            .setId(feature.getId())
-                            .setMagnitude(feature.getProperties().getMag())
-                            .setTitle(feature.getProperties().getTitle())
-                            .setDate(Instant
-                                    .ofEpochMilli(feature.getProperties().getTime())
-                                    .atZone(ZoneId.systemDefault()).toLocalDate())
-                            .setDistance(distance.calculate(lat, lon, lati, longi))
-                            .setCoordinates(new GeoLocation(lati, longi))
-                            .buildEarthquake();
-                })
-                .filter(distinctByKey(Earthquake::getCoordinates))
-                .sorted(Comparator.comparingInt(Earthquake::getDistance))
-                .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
-                .collect(Collectors.toList());
+        if (response != null) {
+            return response.getFeatures().stream()
+                    .map(feature -> {
+                        double lati = feature.getGeometry().getLat();
+                        double longi = feature.getGeometry().getLon();
+                        return new EarthquakeBuilder()
+                                .setId(feature.getId())
+                                .setMagnitude(feature.getProperties().getMag())
+                                .setTitle(feature.getProperties().getTitle())
+                                .setDate(Instant
+                                        .ofEpochMilli(feature.getProperties().getTime())
+                                        .atZone(ZoneId.systemDefault()).toLocalDate())
+                                .setDistance(distance.calculate(lat, lon, lati, longi))
+                                .setCoordinates(new GeoLocation(lati, longi))
+                                .buildEarthquake();
+                    })
+                    .filter(distinctByKey(Earthquake::getCoordinates))
+                    .sorted(Comparator.comparingInt(Earthquake::getDistance))
+                    .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
+                    .collect(Collectors.toList());
+        } else {
+            throw new NullPointerException("Looks like the response from the repository is null");
+        }
     }
 
     @Override
     public Flux<Earthquake> getEarthquakeAsync(double lat, double lon) {
-
         return repository.getUsgsResponseAsync(lat, lon)
                 .map(response -> response.getFeatures()
                     .stream()
@@ -97,7 +97,6 @@ public class UsgsService implements IUsgsService {
                     .limit(NUMBER_CLOSEST_EARTHQUAKE_SITES)
                     .collect(Collectors.toList()))
                 .flatMapMany(Flux::fromIterable);
-
     }
 
     public <T> Predicate<T> distinctByKey(Function<? super T, GeoLocation> keyExtractor) {
