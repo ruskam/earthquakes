@@ -4,59 +4,75 @@ import com.rustam.earthquakes.model.*;
 import com.rustam.earthquakes.repository.IUsgsRepository;
 import com.rustam.earthquakes.util.Distance;
 import com.rustam.earthquakes.util.IDistance;
+import com.rustam.earthquakes.util.IPrinterToConsole;
+import com.rustam.earthquakes.util.PrinterToConsole;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.mockito.Mockito.lenient;
+
 @ExtendWith(MockitoExtension.class)
+//@MockitoSettings(strictness = Strictness.LENIENT)
 class UsgsServiceUnitTest {
+
     private UsgsService service;
     private IDistance distance;
+    private IPrinterToConsole printer;
+    private IUsgsResponse response;
+
     @Mock
     private IUsgsRepository mockedRepository;
 
     @BeforeEach
-    void createServiceInstance() {
-
+    void init() {
+        distance = new Distance();
+        printer = new PrinterToConsole();
+        loadFeatures();
+        Assertions.assertNotNull(mockedRepository);
+        lenient().when(mockedRepository.getUsgsResponse(12.12, 44.44)).thenReturn(response);
+        service = new UsgsService(mockedRepository, distance, printer);
     }
 
-    @Test
-    void getEarthquakeAsync() {
 
-    }
 
     @Test
     void getEarthquake() {
-        IDistance distance = new Distance();
-        UsgsObservation feature1 = new UsgsObservation(new UsgsProperty(3.01, "Place1", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "1");
-        UsgsObservation feature2 = new UsgsObservation(new UsgsProperty(1.45, "Place2", 1613210249310L), new UsgsGeometry(new Double[]{34.2939, 48.23533}), "2");
-        UsgsObservation feature3 = new UsgsObservation(new UsgsProperty(3.78, "Place3", 1613213115880L), new UsgsGeometry(new Double[]{9.291939, 25.2534}), "3");
-        UsgsObservation feature4 = new UsgsObservation(new UsgsProperty(5.55, "Place4", 1613213015880L), new UsgsGeometry(new Double[]{23.456, 68.9863}), "3");
-        UsgsObservation feature1Copy = new UsgsObservation(new UsgsProperty(3.01, "Place1", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "1");
-        List<UsgsObservation> features = List.of(feature1, feature2, feature3, feature4, feature1Copy);
-        IUsgsResponse usgsResponse = new UsgsResponse();
-        usgsResponse.setFeatures(features);
-
-        Assertions.assertNotNull(mockedRepository);
-        Mockito.when(mockedRepository.getUsgsResponse(12.12, 44.44)).thenReturn(usgsResponse);
-        UsgsService service = new UsgsService(mockedRepository);
-        List<Earthquake> earthquakes = service.populateEarthquakes(usgsResponse, 12.12, 44.44);
-        String stop = "here";
-
+//        EarthquakeWrapper earthquakeWrapper = service.getEarthquake(12.12, 15.15);
+//        Assertions.assertEquals(4, earthquakeWrapper.getEarthquakes().size());
 
     }
 
     @Test
     void populateEarthquakes() {
+        List<Earthquake> earthquakes = service.populateEarthquakes(response, 12.12, 44.44);
+
+        Assertions.assertEquals(4, earthquakes.size());
+        Assertions.assertEquals(new HashSet<Earthquake>(earthquakes).size(), earthquakes.size());
+    }
+
+    @Test
+    void getEarthquakeAsync() {}
+
+    void loadFeatures(){
+        UsgsObservation feature1 = new UsgsObservation(new UsgsProperty(3.01, "Place1", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "1");
+        UsgsObservation feature2 = new UsgsObservation(new UsgsProperty(1.45, "Place2", 1613210249310L), new UsgsGeometry(new Double[]{34.2939, 48.23533}), "2");
+        UsgsObservation feature3 = new UsgsObservation(new UsgsProperty(3.78, "Place3", 1613213115880L), new UsgsGeometry(new Double[]{9.291939, 25.2534}), "3");
+        UsgsObservation feature4 = new UsgsObservation(new UsgsProperty(5.55, "Place4", 1613213015880L), new UsgsGeometry(new Double[]{23.456, 68.9863}), "4");
+        UsgsObservation feature5 = new UsgsObservation(new UsgsProperty(3.02, "Place1", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "5");
+        List<UsgsObservation> features = List.of(feature1, feature2, feature3, feature4, feature5);
+
+        response = new UsgsResponse();
+        response.setFeatures(features);
     }
 
     @Test

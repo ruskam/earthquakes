@@ -4,7 +4,6 @@ import com.rustam.earthquakes.model.*;
 import com.rustam.earthquakes.repository.IUsgsRepository;
 import com.rustam.earthquakes.util.IDistance;
 import com.rustam.earthquakes.util.IPrinterToConsole;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
@@ -27,11 +26,6 @@ public class UsgsService implements IUsgsService {
     private IDistance distance;
     private IPrinterToConsole printer;
 
-    public UsgsService(IUsgsRepository repository) {
-        this.repository = repository;
-    }
-
-    @Autowired
     public UsgsService(IUsgsRepository repository, IDistance distance, IPrinterToConsole printer) {
         this.repository = repository;
         this.distance = distance;
@@ -43,7 +37,8 @@ public class UsgsService implements IUsgsService {
         if (isLocationValid(lat, lon)) {
             IUsgsResponse response = repository.getUsgsResponse(lat, lon);
             List<Earthquake> earthquakes = populateEarthquakes(response, lat, lon);
-            printer.print(earthquakes);
+//            printer.print(earthquakes);
+            System.out.println("Data must be mocked");
             return new EarthquakeWrapper(earthquakes);
         } else {
             throw new IllegalArgumentException("Wrong coordinates");
