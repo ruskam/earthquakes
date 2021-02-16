@@ -24,13 +24,6 @@ public class UsgsRepository implements IUsgsRepository {
      */
     @Override
     public UsgsResponse getUsgsResponse(double lat, double lon) {
-        UsgsResponse response = this.webClient
-                .get()
-                .uri(USGS_DATA_URL)
-                .retrieve()
-                .bodyToMono(UsgsResponse.class)
-                .block();
-
         return this.webClient
                 .get()
                 .uri(USGS_DATA_URL)

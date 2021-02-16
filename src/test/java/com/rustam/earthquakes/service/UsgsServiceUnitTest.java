@@ -24,14 +24,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UsgsServiceUnitTest {
     private IDistance distance;
     private IPrinterToConsole printer;
-    private IUsgsResponse response;
+
 
     @Mock
     private IUsgsRepository mockedRepository;
@@ -40,7 +39,6 @@ class UsgsServiceUnitTest {
     void beforeEach() {
         distance = new Distance();
         printer = new PrinterToConsole();
-        loadFeatures();
     }
 
     @Test
@@ -49,15 +47,17 @@ class UsgsServiceUnitTest {
 
         when(service.getEarthquake(anyDouble(), anyDouble())).thenThrow(IllegalArgumentException.class);
 
-        final IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            service.getEarthquake(12.12,15.15);
-        });
+        final IllegalArgumentException exception = Assertions.assertThrows(
+                IllegalArgumentException.class, () -> service.getEarthquake(12.12,15.15));
 
         assertThat(exception.getClass(), is(equalTo(IllegalArgumentException.class)));
     }
 
     @Test
     void getEarthquake() {
+        UsgsResponse response = new UsgsResponse();
+        response.setFeatures(getFeatures());
+
         assertNotNull(mockedRepository);
         when(mockedRepository.getUsgsResponse(anyDouble(), anyDouble())).thenReturn(response);
         IUsgsService service = new UsgsService(mockedRepository, distance, printer);
@@ -69,8 +69,11 @@ class UsgsServiceUnitTest {
 
     @Test
     void populateEarthquakes() {
+        UsgsResponse response = new UsgsResponse();
+        response.setFeatures(getFeatures());
+
         assertNotNull(mockedRepository);
-        when(mockedRepository.getUsgsResponse(anyDouble(), anyDouble())).thenReturn(response);
+        lenient().when(mockedRepository.getUsgsResponse(anyDouble(), anyDouble())).thenReturn(response);
         UsgsService service = new UsgsService(mockedRepository, distance, printer);
         List<Earthquake> earthquakes = service.populateEarthquakes(response, 12.34, 56.78);
 
@@ -79,18 +82,27 @@ class UsgsServiceUnitTest {
     }
 
     @Test
-    void getEarthquakeAsync() {}
+    void getEarthquakeAsync() {
+        UsgsService service = new UsgsService(mockedRepository, distance, printer);
+        assertNotNull(mockedRepository);
+//        Mono<UsgsResponse> mono = Mono.just(response);
+//        when(mockedRepository.getUsgsResponseAsync(anyDouble(), anyDouble())).thenReturn(mono);
 
-    void loadFeatures(){
+    }
+
+    List<UsgsObservation> getFeatures(){
         UsgsObservation feature1 = new UsgsObservation(new UsgsProperty(3.01, "Place1", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "1");
         UsgsObservation feature2 = new UsgsObservation(new UsgsProperty(1.45, "Place2", 1613210249310L), new UsgsGeometry(new Double[]{34.2939, 48.23533}), "2");
         UsgsObservation feature3 = new UsgsObservation(new UsgsProperty(3.78, "Place3", 1613213115880L), new UsgsGeometry(new Double[]{9.291939, 25.2534}), "3");
         UsgsObservation feature4 = new UsgsObservation(new UsgsProperty(5.55, "Place4", 1613213015880L), new UsgsGeometry(new Double[]{23.456, 68.9863}), "4");
         UsgsObservation feature5 = new UsgsObservation(new UsgsProperty(3.02, "Place1", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "5");
-        List<UsgsObservation> features = List.of(feature1, feature2, feature3, feature4, feature5);
-
-        response = new UsgsResponse();
-        response.setFeatures(features);
+        List<UsgsObservation> features = new ArrayList<>();
+        features.add(feature1);
+        features.add(feature2);
+        features.add(feature3);
+        features.add(feature4);
+        features.add(feature5);
+        return features;
     }
 
     @Test
