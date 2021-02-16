@@ -19,12 +19,16 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.lenient;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class UsgsServiceUnitTest {
-
-    private UsgsService service;
     private IDistance distance;
     private IPrinterToConsole printer;
     private IUsgsResponse response;
@@ -37,28 +41,41 @@ class UsgsServiceUnitTest {
         distance = new Distance();
         printer = new PrinterToConsole();
         loadFeatures();
+    }
 
+    @Test
+    void testGetEarthquakeException(){
+        final UsgsService service = mock(UsgsService.class);
+
+        when(service.getEarthquake(anyDouble(), anyDouble())).thenThrow(IllegalArgumentException.class);
+
+        final IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            service.getEarthquake(12.12,15.15);
+        });
+
+        assertThat(exception.getClass(), is(equalTo(IllegalArgumentException.class)));
     }
 
     @Test
     void getEarthquake() {
-        Assertions.assertNotNull(mockedRepository);
-        lenient().when(mockedRepository.getUsgsResponse(12.12, 44.44)).thenReturn(response);
-        service = new UsgsService(mockedRepository, distance, printer);
+        assertNotNull(mockedRepository);
+        when(mockedRepository.getUsgsResponse(anyDouble(), anyDouble())).thenReturn(response);
+        IUsgsService service = new UsgsService(mockedRepository, distance, printer);
 
         EarthquakeWrapper earthquakeWrapper = service.getEarthquake(12.12, 15.15);
-        Assertions.assertEquals(4, earthquakeWrapper.getEarthquakes().size());
+        assertNotNull(earthquakeWrapper);
+        assertEquals(4, earthquakeWrapper.getEarthquakes().size());
     }
 
     @Test
     void populateEarthquakes() {
-        Assertions.assertNotNull(mockedRepository);
-        lenient().when(mockedRepository.getUsgsResponse(12.12, 44.44)).thenReturn(response);
-        service = new UsgsService(mockedRepository, distance, printer);
-        List<Earthquake> earthquakes = service.populateEarthquakes(response, 12.12, 44.44);
+        assertNotNull(mockedRepository);
+        when(mockedRepository.getUsgsResponse(anyDouble(), anyDouble())).thenReturn(response);
+        UsgsService service = new UsgsService(mockedRepository, distance, printer);
+        List<Earthquake> earthquakes = service.populateEarthquakes(response, 12.34, 56.78);
 
-        Assertions.assertEquals(4, earthquakes.size());
-        Assertions.assertEquals(new HashSet<Earthquake>(earthquakes).size(), earthquakes.size());
+        assertEquals(4, earthquakes.size());
+        assertEquals(new HashSet<>(earthquakes).size(), earthquakes.size());
     }
 
     @Test
@@ -78,18 +95,19 @@ class UsgsServiceUnitTest {
 
     @Test
     void distinctByKey() {
+        UsgsService service = new UsgsService(mockedRepository, distance, printer);
         List<Earthquake> earthquakes = new ArrayList<>();
         Earthquake e1 = new EarthquakeBuilder().setId("1")
                 .setMagnitude(1.3)
-                .setDate(LocalDate.of(2021, 01, 12))
+                .setDate(LocalDate.of(2021, 1, 12))
                 .setCoordinates(new GeoLocation(44.4806, 80.1145))
                 .buildEarthquake();
-        Earthquake e2 = new EarthquakeBuilder().setId("1")
+        Earthquake e2 = new EarthquakeBuilder().setId("2")
                 .setMagnitude(4.1)
-                .setDate(LocalDate.of(2001, 01, 12))
+                .setDate(LocalDate.of(2001, 1, 12))
                 .setCoordinates(new GeoLocation(44.4806, 80.1145))
                 .buildEarthquake();
-        Earthquake e3 = new EarthquakeBuilder().setId("1")
+        Earthquake e3 = new EarthquakeBuilder().setId("3")
                 .setMagnitude(2.6)
                 .setDate(LocalDate.of(2020, 11, 2))
                 .setCoordinates(new GeoLocation(48.34806, 56.76543))
@@ -102,8 +120,8 @@ class UsgsServiceUnitTest {
                 .filter(service.distinctByKey(Earthquake::getCoordinates))
                 .collect(Collectors.toList());
 
-        Assertions.assertTrue(actual.contains(e1));
-        Assertions.assertFalse(actual.contains(e2));
-        Assertions.assertTrue(actual.contains(e3));
+        assertTrue(actual.contains(e1));
+        assertFalse(actual.contains(e2));
+        assertTrue(actual.contains(e3));
     }
 }
