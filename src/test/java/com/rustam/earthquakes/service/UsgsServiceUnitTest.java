@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 class UsgsServiceUnitTest {
     private IDistance distance;
     private IPrinterToConsole printer;
-
+    UsgsResponse response;
 
     @Mock
     private IUsgsRepository mockedRepository;
@@ -39,6 +39,8 @@ class UsgsServiceUnitTest {
     void beforeEach() {
         distance = new Distance();
         printer = new PrinterToConsole();
+        response = new UsgsResponse();
+        response.setFeatures(getFeatures());
     }
 
     @Test
@@ -55,9 +57,6 @@ class UsgsServiceUnitTest {
 
     @Test
     void getEarthquake() {
-        UsgsResponse response = new UsgsResponse();
-        response.setFeatures(getFeatures());
-
         assertNotNull(mockedRepository);
         when(mockedRepository.getUsgsResponse(anyDouble(), anyDouble())).thenReturn(response);
         IUsgsService service = new UsgsService(mockedRepository, distance, printer);
@@ -69,9 +68,6 @@ class UsgsServiceUnitTest {
 
     @Test
     void populateEarthquakes() {
-        UsgsResponse response = new UsgsResponse();
-        response.setFeatures(getFeatures());
-
         assertNotNull(mockedRepository);
         lenient().when(mockedRepository.getUsgsResponse(anyDouble(), anyDouble())).thenReturn(response);
         UsgsService service = new UsgsService(mockedRepository, distance, printer);
