@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -81,9 +83,14 @@ class UsgsServiceUnitTest {
     void getEarthquakeAsync() {
         UsgsService service = new UsgsService(mockedRepository, distance, printer);
         assertNotNull(mockedRepository);
-//        Mono<UsgsResponse> mono = Mono.just(response);
-//        when(mockedRepository.getUsgsResponseAsync(anyDouble(), anyDouble())).thenReturn(mono);
+        Mono<UsgsResponse> mono = Mono.just(response);
+        lenient().when(mockedRepository.getUsgsResponseAsync(anyDouble(), anyDouble())).thenReturn(mono);
+        Flux<Earthquake> flux = service.getEarthquakeAsync(anyDouble(), anyDouble());
 
+        List<Earthquake> listOfEarthquakes = flux.toStream().collect(Collectors.toList());
+        assertEquals(4, listOfEarthquakes.size());
+
+        assertEquals(new HashSet<>(listOfEarthquakes).size(), listOfEarthquakes.size());
     }
 
     List<UsgsObservation> getFeatures(){
