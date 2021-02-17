@@ -52,9 +52,9 @@ class UsgsServiceUnitTest {
         when(service.getEarthquake(anyDouble(), anyDouble())).thenThrow(IllegalArgumentException.class);
 
         final IllegalArgumentException exception = Assertions.assertThrows(
-                IllegalArgumentException.class, () -> service.getEarthquake(12.12,15.15));
-
+                IllegalArgumentException.class, () -> service.getEarthquake(-10,15.15));
         assertThat(exception.getClass(), is(equalTo(IllegalArgumentException.class)));
+
     }
 
     @Test
@@ -98,7 +98,7 @@ class UsgsServiceUnitTest {
         UsgsObservation feature2 = new UsgsObservation(new UsgsProperty(1.45, "Place2", 1613210249310L), new UsgsGeometry(new Double[]{34.2939, 48.23533}), "2");
         UsgsObservation feature3 = new UsgsObservation(new UsgsProperty(3.78, "Place3", 1613213115880L), new UsgsGeometry(new Double[]{9.291939, 25.2534}), "3");
         UsgsObservation feature4 = new UsgsObservation(new UsgsProperty(5.55, "Place4", 1613213015880L), new UsgsGeometry(new Double[]{23.456, 68.9863}), "4");
-        UsgsObservation feature5 = new UsgsObservation(new UsgsProperty(3.02, "Place1", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "5");
+        UsgsObservation feature5 = new UsgsObservation(new UsgsProperty(3.02, "Place5", 1613213315880L), new UsgsGeometry(new Double[]{39.2999, 45.23984}), "5");
         List<UsgsObservation> features = new ArrayList<>();
         features.add(feature1);
         features.add(feature2);
