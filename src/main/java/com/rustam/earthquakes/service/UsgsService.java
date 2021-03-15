@@ -21,6 +21,10 @@ import java.util.stream.Collectors;
 public class UsgsService implements IUsgsService {
 
     private static final int NUMBER_CLOSEST_EARTHQUAKE_SITES = 10;
+    private static final int LATITUDE_MIN_THRESHOLD = -90;
+    private static final int LATITUDE_MAX_THRESHOLD = 90;
+    private static final int LONGITUDE_MIN_THRESHOLD = -180;
+    private static final int LONGITUDE_MAX_THRESHOLD = 180;
 
     private IUsgsRepository repository;
     private IDistance distance;
@@ -44,7 +48,8 @@ public class UsgsService implements IUsgsService {
     }
 
     private boolean isLocationValid(double lat, double lon) {
-        return (lat >= -90 && lat <= 90) && (lon >= -180 && lon <= 180);
+        return (lat >= LATITUDE_MIN_THRESHOLD && lat <= LATITUDE_MAX_THRESHOLD)
+                && (lon >= LONGITUDE_MIN_THRESHOLD && lon <= LONGITUDE_MAX_THRESHOLD);
     }
 
     public List<Earthquake> populateEarthquakes(IUsgsResponse response, double lat, double lon) {
