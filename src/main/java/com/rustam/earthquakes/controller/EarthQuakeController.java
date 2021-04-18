@@ -11,7 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Flux;
 
 @RestController
-@RequestMapping(value = ControllerConstants.EARTH_QUAKE_ENDPOINT)
+//@RequestMapping(value = ControllerConstants.EARTH_QUAKE_ENDPOINT)
+@RequestMapping(value = "/api/earthquake")
 public class EarthQuakeController {
 
     private final IUsgsService service;
