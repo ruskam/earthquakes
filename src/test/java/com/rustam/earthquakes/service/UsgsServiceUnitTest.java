@@ -32,7 +32,7 @@ import static org.mockito.Mockito.*;
 class UsgsServiceUnitTest {
     private IDistance distance;
     private IPrinterToConsole printer;
-    UsgsResponse response;
+    private UsgsResponse response;
 
     @Mock
     private IUsgsRepository mockedRepository;
@@ -55,6 +55,12 @@ class UsgsServiceUnitTest {
                 IllegalArgumentException.class, () -> service.getEarthquake(-10,15.15));
         assertThat(exception.getClass(), is(equalTo(IllegalArgumentException.class)));
 
+    }
+
+    @Test
+    void testIllegalArgumentExceptionThrownWhenParameterNotValid(){
+        IUsgsService service = new UsgsService(mockedRepository, distance, printer);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> service.getEarthquake(-110,15.15));
     }
 
     @Test
